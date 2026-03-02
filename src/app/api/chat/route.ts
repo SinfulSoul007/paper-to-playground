@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const client = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+function getClient() {
+  return new OpenAI({
+    baseURL: 'https://openrouter.ai/api/v1',
+    apiKey: process.env.OPENROUTER_API_KEY || '',
+  });
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,7 +54,7 @@ ${truncatedPaper}`;
     // Add current message
     messages.push({ role: 'user', content: message });
 
-    const response = await client.chat.completions.create({
+    const response = await getClient().chat.completions.create({
       model: 'nvidia/nemotron-3-nano-30b-a3b:free',
       max_tokens: 2000,
       messages,

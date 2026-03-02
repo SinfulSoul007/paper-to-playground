@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Exa from 'exa-js';
 
-const exa = new Exa(process.env.EXA_API_KEY);
+function getExa() {
+  return new Exa(process.env.EXA_API_KEY || '');
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,7 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await exa.search(query, {
+    const result = await getExa().search(query, {
       type: 'auto',
       category: 'research paper',
       numResults: 6,

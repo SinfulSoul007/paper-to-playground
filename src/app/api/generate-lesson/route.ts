@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const client = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY,
-});
+function getClient() {
+  return new OpenAI({
+    baseURL: 'https://openrouter.ai/api/v1',
+    apiKey: process.env.OPENROUTER_API_KEY || '',
+  });
+}
 
 const SYSTEM_PROMPT = `You are an expert educator and researcher. You will receive the full text of an academic research paper and a student's background level. Your job is to generate a complete, structured interactive lesson that teaches the key ideas of this paper at the appropriate depth.
 
@@ -161,7 +163,7 @@ export async function POST(request: NextRequest) {
     const userMessage = `Here is the paper text:\n\n${truncatedText}\n\nThe student's background level is: ${level}`;
 
     console.log('Calling OpenRouter API (Nemotron a3b)...');
-    const response = await client.chat.completions.create({
+    const response = await getClient().chat.completions.create({
       model: 'nvidia/nemotron-3-nano-30b-a3b:free',
       max_tokens: 16000,
       messages: [
@@ -188,7 +190,7 @@ export async function POST(request: NextRequest) {
       const shorterText = paperText.slice(0, 20000);
       const shorterMessage = `Here is the paper text (abbreviated):\n\n${shorterText}\n\nThe student's background level is: ${level}\n\nIMPORTANT: Keep your response concise. Use shorter section content (2-3 paragraphs each). Generate exactly 5 sections, 8 concept map nodes, 2 interactive elements, 4 quiz questions, and 3 related papers.`;
 
-      const retryResponse = await client.chat.completions.create({
+      const retryResponse = await getClient().chat.completions.create({
         model: 'nvidia/nemotron-3-nano-30b-a3b:free',
         max_tokens: 16000,
         messages: [
@@ -220,7 +222,7 @@ export async function POST(request: NextRequest) {
 
       // Retry once
       console.warn('Retrying...');
-      const retryResponse = await client.chat.completions.create({
+      const retryResponse = await getClient().chat.completions.create({
         model: 'nvidia/nemotron-3-nano-30b-a3b:free',
         max_tokens: 16000,
         messages: [
