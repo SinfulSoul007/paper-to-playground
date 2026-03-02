@@ -2,6 +2,7 @@
 
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 
 interface MarkdownRendererProps {
@@ -13,7 +14,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
   return (
     <div className={`markdown-content ${className}`}>
       <ReactMarkdown
-        remarkPlugins={[remarkMath]}
+        remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
       >
         {content}

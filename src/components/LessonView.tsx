@@ -10,13 +10,15 @@ import InteractiveAnimation from './InteractiveAnimation';
 import ConceptMap from './ConceptMap';
 import Quiz from './Quiz';
 import RelatedPapers from './RelatedPapers';
+import PaperChat from './PaperChat';
 
 interface LessonViewProps {
   lesson: LessonData;
+  paperText: string;
   onGoHome: () => void;
 }
 
-export default function LessonView({ lesson, onGoHome }: LessonViewProps) {
+export default function LessonView({ lesson, paperText, onGoHome }: LessonViewProps) {
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set());
   const [showConceptMap, setShowConceptMap] = useState(false);
 
@@ -143,6 +145,9 @@ export default function LessonView({ lesson, onGoHome }: LessonViewProps) {
           )}
         </div>
       </main>
+
+      {/* Floating chatbot */}
+      <PaperChat paperText={paperText} />
 
       {/* Concept map modal */}
       {showConceptMap && lesson.conceptMap && (

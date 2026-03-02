@@ -1,8 +1,8 @@
 # Paper to Playground
 
-**Turn academic papers into interactive, level-adapted lessons—with concept maps, quizzes, sliders, and related papers.**
+**Turn academic papers into interactive, level-adapted lessons—with concept maps, quizzes, sliders, a chatbot, and related papers.**
 
-Paper to Playground is a web app that takes a research paper (PDF upload or arXiv/OpenReview URL), extracts its text, and uses an LLM to generate a structured, interactive lesson tailored to the reader’s background (beginner → expert). You get sections with key takeaways, a concept map, interactive widgets (sliders, comparisons, animations), a quiz, and related paper suggestions—all in one place.
+Paper to Playground is a web app that takes a research paper (PDF upload or arXiv/OpenReview URL), extracts its text, and uses an LLM to generate a structured, interactive lesson tailored to the reader’s background (beginner → expert). You get sections with key takeaways, a concept map, interactive widgets (sliders, comparisons, animations), a quiz, related paper suggestions, and a floating chatbot to ask follow-up questions—all in one place.
 
 ---
 
@@ -14,7 +14,8 @@ Paper to Playground is a web app that takes a research paper (PDF upload or arXi
 - **Concept map** — Interactive graph of concepts (nodes + edges) with prerequisites and difficulty.
 - **Interactive elements** — Sliders (parameter exploration), before/after comparisons, and step-by-step animations.
 - **Quiz** — Multiple-choice questions (conceptual, application, what-if) with explanations and section references.
-- **Related papers** — AI-suggested follow-up papers; optional search via [Exa](https://exa.ai) for discovery.
+- **Related papers** — AI-suggested follow-up papers; optional search via [Exa](https://exa.ai) for discovery. Clicking a discovered paper opens it in a new tab, ready to generate a lesson.
+- **Paper chatbot** — Floating chat widget to ask follow-up questions about the paper. Supports markdown, LaTeX, and tables in responses.
 - **Deep links** — Open a paper by URL with `?url=<encoded-paper-url>` for sharing or related-paper flows.
 
 ---
@@ -26,7 +27,7 @@ Paper to Playground is a web app that takes a research paper (PDF upload or arXi
 | Framework   | [Next.js 16](https://nextjs.org) (App Router, Turbopack) |
 | UI         | React 19, [Tailwind CSS 4](https://tailwindcss.com) |
 | Diagrams   | [React Flow](https://reactflow.dev) + [Dagre](https://github.com/dagrejs/dagre) for layout |
-| Math       | [KaTeX](https://katex.org) via `react-markdown` + `remark-math` + `rehype-katex` |
+| Math       | [KaTeX](https://katex.org) via `react-markdown` + `remark-math` + `rehype-katex` + `remark-gfm` |
 | PDF        | [pdf-parse](https://www.npmjs.com/package/pdf-parse) (server-side) |
 | LLM        | [OpenRouter](https://openrouter.ai) (e.g. Nemotron 3 Nano 30B) for lesson generation |
 | Search     | [Exa](https://exa.ai) (optional) for related-paper search |
@@ -96,6 +97,7 @@ paper-to-playground/
 ├── src/
 │   ├── app/
 │   │   ├── api/
+│   │   │   ├── chat/              # POST: ask questions about the paper
 │   │   │   ├── generate-lesson/   # POST: paperText + level → full lesson JSON
 │   │   │   ├── parse-pdf/         # POST: file or url → { text, title }
 │   │   │   └── search-papers/    # POST: query → Exa results (related papers)
@@ -113,10 +115,11 @@ paper-to-playground/
 │   │   ├── InteractiveComparison.tsx
 │   │   ├── InteractiveAnimation.tsx
 │   │   ├── RelatedPapers.tsx      # Related papers + optional Exa search
-│   │   ├── MarkdownRenderer.tsx   # Markdown + LaTeX (KaTeX)
+│   │   ├── PaperChat.tsx          # Floating chatbot for paper Q&A
+│   │   ├── MarkdownRenderer.tsx   # Markdown + LaTeX (KaTeX) + GFM tables
 │   │   └── Sidebar.tsx
 │   └── lib/
-│       ├── api.ts                 # Client: parsePdf, generateLesson, searchPapers
+│       ├── api.ts                 # Client: parsePdf, generateLesson, searchPapers, chatWithPaper
 │       └── types.ts               # LessonData, sections, concept map, quiz, etc.
 ├── .env.local.example
 ├── next.config.ts
@@ -135,6 +138,7 @@ All APIs are under `src/app/api/`.
 | `/api/parse-pdf`    | POST   | `FormData` with `file`, or JSON `{ url }` | Extract text (and title) from PDF. |
 | `/api/generate-lesson` | POST | `{ paperText: string, level: 'beginner' \| 'undergrad' \| 'grad' \| 'expert' }` | Generate full lesson JSON (sections, concept map, quiz, interactives, related papers). |
 | `/api/search-papers`   | POST | `{ query: string }` | Search research papers via Exa (requires `EXA_API_KEY`). |
+| `/api/chat`            | POST | `{ message: string, paperText: string, history: {role, content}[] }` | Chat about the paper; returns `{ reply: string }`. |
 
 Lesson JSON shape (see `src/lib/types.ts` and the system prompt in `generate-lesson/route.ts`) includes: `paperTitle`, `authors`, `tldr`, `sections[]`, `conceptMap`, `interactiveElements[]`, `quiz[]`, `relatedPapers[]`.
 

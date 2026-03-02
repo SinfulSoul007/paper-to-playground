@@ -65,3 +65,28 @@ export async function searchRelatedPapers(query: string): Promise<ExaPaper[]> {
   const data = await res.json();
   return data.papers;
 }
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export async function chatWithPaper(
+  message: string,
+  paperText: string,
+  history: ChatMessage[]
+): Promise<string> {
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, paperText, history }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Chat failed' }));
+    throw new Error(err.error || 'Chat failed');
+  }
+
+  const data = await res.json();
+  return data.reply;
+}

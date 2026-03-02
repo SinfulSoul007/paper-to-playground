@@ -82,7 +82,7 @@ For type "animation", config must be:
 {"steps": [{"label": "string", "description": "string"}]}
 
 GENERATION GUIDELINES:
-- Generate 5-7 sections that progressively build understanding.
+- Generate 6-8 sections that progressively build understanding.
 - Generate 8-12 concept map nodes and 10-15 edges.
 - Generate 2 interactive elements (at least one slider type).
 - Generate 5 quiz questions mixing conceptual, application, and what-if types. Quiz type must be one of: "conceptual", "application", "whatif".
@@ -92,8 +92,16 @@ GENERATION GUIDELINES:
 - For "grad" level: assume technical literacy, focus on methodology and novelty, full math.
 - For "expert" level: skip basics, focus on contributions vs prior work, limitations, detailed math.
 - Make content ENGAGING — use "you" language, rhetorical questions, vivid analogies.
-- Keep section content concise but informative (2-4 paragraphs each).
+- Each section should be 4-6 paragraphs. Include concrete examples, explain why each concept matters, and connect ideas to other sections where relevant.
 - CRITICAL: Return ONLY valid JSON. No markdown fences, no text before or after the JSON object.`;
+
+function fixLatexDelimiters(text: string): string {
+  return text
+    .replace(/\\\[/g, '$$')
+    .replace(/\\\]/g, '$$')
+    .replace(/\\\(/g, '$')
+    .replace(/\\\)/g, '$');
+}
 
 function tryParseJSON(text: string) {
   // Strip markdown code fences if present
@@ -107,6 +115,9 @@ function tryParseJSON(text: string) {
     cleaned = cleaned.slice(0, -3);
   }
   cleaned = cleaned.trim();
+
+  // Fix LaTeX delimiters before parsing
+  cleaned = fixLatexDelimiters(cleaned);
 
   // Try direct parse
   try {

@@ -133,7 +133,9 @@ export default function Home() {
 
       {step === 'loading' && <LoadingScreen />}
 
-      {step === 'lesson' && lesson && <LessonView lesson={lesson} onGoHome={handleGoHome} />}
+      {step === 'lesson' && lesson && paperText && (
+        <LessonView lesson={lesson} paperText={paperText} onGoHome={handleGoHome} />
+      )}
     </>
   );
 }
