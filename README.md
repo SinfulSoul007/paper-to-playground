@@ -47,7 +47,7 @@ Paper to Playground is a web app that takes a research paper (PDF upload or arXi
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/paper-to-playground.git
+git clone https://github.com/SinfulSoul007/paper-to-playground.git
 cd paper-to-playground
 npm install
 ```
